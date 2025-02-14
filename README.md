@@ -1,4 +1,4 @@
-# final_project_financial
+# final_project_financial SQL
 Data, které byly použity pro tento projekt jsou dostupné na stránkách https://fit.cvut.cz/cs/veda-a-vyzkum/cemu-se-venujeme/projekty/relational
 
 Byla použita finanční databáze, která obsahuje informace o půjčkách (buď v plné výši nebo ne).
