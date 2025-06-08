@@ -81,3 +81,33 @@ HAVING o.status <> 'Shipped' AND COUNT(o.status) >= 2
 ORDER BY or_de.quantityordered DESC, pocet DESC;
 
 
+
+
+### 📌 Analýza poboček a zaměstnanců – dočasná tabulka + filtrování obchodních zástupců
+
+Tato sada SQL příkazů využívá `LEFT JOIN` pro spojení tabulek `offices` a `employees`, 
+ukládá výsledek do **dočasné tabulky**, a následně analyzuje počty zaměstnanců na jednotlivých pobočkách podle pracovní pozice.
+
+-- 📌 Vytvoření dočasné tabulky s propojenými údaji o pobočkách a zaměstnancích
+CREATE TEMPORARY TABLE offices_with_employees AS 
+SELECT * 
+FROM offices 
+LEFT JOIN employees AS e
+  ON e.office_code = offices.officecode;
+
+-- 📋 Náhled obsahu dočasné tabulky (volitelné)
+SELECT * FROM offices_with_employees;
+
+-- 📊 Výpočet počtu obchodních zástupců (Sales Rep) podle města a pobočky
+SELECT 
+  city, 
+  officecode, 
+  COUNT(jobtitle) AS position, 
+  jobtitle
+FROM offices_with_employees
+GROUP BY city, jobtitle, officecode
+HAVING jobtitle = 'Sales Rep'
+ORDER BY position DESC;
+
+
+
