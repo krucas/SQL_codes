@@ -1,0 +1,83 @@
+### 🔧 PostgreSQL procedura: `uprav_extension`
+
+Tato procedura slouží k úpravě hodnoty sloupce `extension` u zaměstnance v tabulce `employees`.
+
+#### 🧠 Co dělá:
+- Najde zaměstnance podle `employeenumber`
+- Aktualizuje jeho `extension` na novou hodnotu
+- Vypíše systémovou zprávu (`RAISE NOTICE`) s potvrzením změny
+
+#### 🛠️ Definice:
+
+```sql
+DROP PROCEDURE IF EXISTS uprav_extension;
+
+CREATE PROCEDURE uprav_extension(p_employeenumber INT, p_extension VARCHAR)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE employees
+    SET extension = p_extension
+    WHERE employeenumber = p_employeenumber;
+
+    RAISE NOTICE 'Zamestnanec % byl upraven, ve sloupci extension na: %', p_employeenumber, p_extension;
+END;
+$$;
+
+- Volání procedury
+CALL uprav_extension(1621, 'x101x4');
+
+
+
+### 💰 Výpočet tržeb podle produktového kódu
+
+Tento SQL dotaz agreguje údaje z tabulky `orderdetails`:
+
+- Seskupuje záznamy podle `productcode` a `priceeach`
+- Sčítá celkový počet objednaných kusů (`quantityordered`)
+- Vypočítá celkové tržby za každý produkt jako `priceeach * quantityordered` a zaokrouhluje je na celé číslo
+- Výsledek je seřazen podle celkového počtu objednaných kusů sestupně
+
+```sql
+SELECT 
+  productcode, 
+  priceeach, 
+  SUM(quantityordered) AS total_quantity,
+  ROUND(SUM(priceeach * quantityordered)::numeric, 0) AS revenue
+FROM orderdetails
+GROUP BY productcode, priceeach
+ORDER BY total_quantity DESC;
+
+
+
+## 📦 Přehled objednávek podle stavu, produktu a množství (vyjma doručených)
+
+Tento SQL dotaz analyzuje objednávky z několika tabulek (`orders`, `orderdetails`, `products`) a vrací:
+
+- Stav objednávky (`o.status`)
+- Počet výskytů daného stavu (`COUNT(o.status)` jako `pocet`)
+- Název produktu (`productname`)
+- Počet objednaných kusů (`quantityordered`)
+
+#### 🔍 Co dotaz dělá:
+- Používá `LEFT JOIN` mezi `orders`, `orderdetails` a `products`
+- Seskupuje záznamy podle stavu objednávky, názvu produktu a počtu objednaných kusů
+- Pomocí `HAVING` filtruje jen ty kombinace, kde:
+  - Stav objednávky není `'Shipped'`
+  - Daný stav se vyskytuje alespoň dvakrát (`COUNT(o.status) >= 2`)
+- Výsledky seřazuje podle `quantityordered` sestupně, pak podle počtu (`pocet`) sestupně
+
+```sql
+SELECT 
+  o.status, 
+  COUNT(o.status) AS pocet, 
+  p.productname, 
+  or_de.quantityordered
+FROM orders AS o
+LEFT JOIN orderdetails AS or_de ON or_de.ordernumber = o.ordernumber
+LEFT JOIN products AS p ON p.productcode = or_de.productcode
+GROUP BY o.status, p.productname, or_de.quantityordered
+HAVING o.status <> 'Shipped' AND COUNT(o.status) >= 2
+ORDER BY or_de.quantityordered DESC, pocet DESC;
+
+
