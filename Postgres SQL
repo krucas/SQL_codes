@@ -1,33 +1,3 @@
-### 🔧 PostgreSQL procedura: `uprav_extension`
-
-Tato procedura slouží k úpravě hodnoty sloupce `extension` u zaměstnance v tabulce `employees`.
-
-#### 🧠 Co dělá:
-- Najde zaměstnance podle `employeenumber`
-- Aktualizuje jeho `extension` na novou hodnotu
-- Vypíše systémovou zprávu (`RAISE NOTICE`) s potvrzením změny
-
-#### 🛠️ Definice:
-
-```sql
-DROP PROCEDURE IF EXISTS uprav_extension;
-
-CREATE PROCEDURE uprav_extension(p_employeenumber INT, p_extension VARCHAR)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    UPDATE employees
-    SET extension = p_extension
-    WHERE employeenumber = p_employeenumber;
-
-    RAISE NOTICE 'Zamestnanec % byl upraven, ve sloupci extension na: %', p_employeenumber, p_extension;
-END;
-$$;
-
-- Volání procedury
-CALL uprav_extension(1621, 'x101x4');
-
-
 
 ### 💰 Výpočet tržeb podle produktového kódu
 
