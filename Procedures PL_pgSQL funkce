@@ -1,0 +1,22 @@
+-- ukázka jednoduche funkce v PL/pgSQL, která zjistí, jest je číslo sudé nebo liché. 
+-- Na vstupu vezme INTEGER, provede podminku přes IF a vratí text. 
+
+CREATE OR REPLACE FUNCTION suda_licha(num INTEGER)
+RETURNS TEXt AS $$
+DECLARE 
+	vysledek TEXT;
+BEGIN
+	IF num % 2 = 0 THEN
+		vysledek := 'cislo je sude';
+	ELSE
+		vysledek := 'cislo je liche';
+	END if;
+	RETURN vysledek;
+END;
+$$ LANGUAGE plpgsql;
+
+
+SELECT suda_licha(98);
+
+-- výstup "cislo je sude"
+
