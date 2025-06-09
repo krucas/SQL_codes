@@ -1,3 +1,54 @@
+💾 Audit log změn částky v tabulce amount
+Tento SQL skript zavádí mechanismus auditu změn sloupce amount v tabulce amount. Cílem je sledovat každou změnu hodnoty a ukládat informace o těchto změnách do nové tabulky audit_log.
+
+🔧 Co skript dělá:
+Vytváří tabulku audit_log
+Uchovává záznamy o změnách částky (amount) včetně
+
+CREATE TABLE audit_log (
+orders_id INTEGER,
+default_amount NUMERIC,
+new_amount NUMERIC,
+change_date TIMESTAMP DEFAULT now()
+);
+
+--Čistí případné předchozí definice triggeru a funkce
+--Pomocí DROP TRIGGER a DROP FUNCTION, aby se předešlo konfliktům při opakovaném nasazení.
+
+DROP TRIGGER trg_castka_update ON amount;
+DROP FUNCTION IF EXISTS log_update_amount;
+
+CREATE OR REPLACE FUNCTION log_update_amount()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF NEW.amount IS DISTINCT FROM OLD.amount THEN
+		INSERT INTO audit_log (orders_id, default_amount, new_amount, change_date)
+		VALUES (NEW.id, OLD.amount, NEW.amount, NOW());
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--Vytváří trigger a funkci
+--Trigger trg_castka_update spouští funkci log_update_amount() po každé aktualizaci řádku v tabulce amount.
+--Funkce porovná starou a novou hodnotu sloupce amount. Pokud se liší, vloží záznam do audit_log.
+
+CREATE TRIGGER trg_castka_update
+AFTER UPDATE ON amount
+FOR EACH ROW
+EXECUTE FUNCTION log_update_amount();
+
+--Příklad aktualizací
+--Dvě aktualizace, které mění částku objednávky s id = 3, vygenerují dva záznamy v audit_log.
+
+UPDATE amount SET amount = amount - 17350 WHERE id = 3;
+UPDATE amount SET amount = amount - 1500 WHERE id = 3;
+-- výstup
+3	147000	129650	"2025-06-09 16:06:50.090607"
+3	129650	128150	"2025-06-09 16:06:55.815143"
+
+
+
 ### 🔧 PostgreSQL procedura: `uprav_extension`
 
 Tato procedura slouží k úpravě hodnoty sloupce `extension` u zaměstnance v tabulce `employees`.
