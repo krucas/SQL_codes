@@ -1,4 +1,4 @@
--- ukázka jednoduche funkce v PL/pgSQL, která zjistí, jest je číslo sudé nebo liché. 
+-- ukázka jednoduche funkce v PL/pgSQL, která zjistí, jestli je číslo sudé nebo liché. 
 -- Na vstupu vezme INTEGER, provede podminku přes IF a vratí text. 
 
 CREATE OR REPLACE FUNCTION suda_licha(num INTEGER)
@@ -20,3 +20,30 @@ SELECT suda_licha(98);
 
 -- výstup "cislo je sude"
 
+ 
+-- tato funkce byla  vytvořena v rámci učení PL/pgSQL. Slouží jako ukázka praktické práce s funkcemi. 
+-- Skript obsahuje napsanou funkci, která vrací celkový součet objednaného množství jednotlivých produktů pro zadané číslo objednávky. "ordernumber".
+
+CREATE OR REPLACE FUNCTION soucet_objednavek (order_number INTEGER)
+RETURNS TABLE (
+product_code VARCHAR,
+celkem_objednavek NUMERIC) 
+AS $$
+
+BEGIN
+	RETURN QUERY
+	SELECT productcode, SUM(quantityordered)
+	FROM orderdetails
+	WHERE ordernumber = order_number
+	GROUP BY productcode
+	ORDER BY SUM(quantityordered) DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- zvoláni funkce
+SELECT *  FROM soucet_objednavek(10122);
+-- výstup 
+"product_code"	"celkem_objednavek"
+"S18_1889"	43
+"S24_3856"	43
+"S12_1099"	42
