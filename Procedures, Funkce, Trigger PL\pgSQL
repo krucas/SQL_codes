@@ -130,3 +130,33 @@ SELECT *  FROM soucet_objednavek(10122);
 "S18_1889"	43
 "S24_3856"	43
 "S12_1099"	42
+
+
+----------------------------------------
+
+-- Tato funkce vrací textový popis množství (např. "malé množství", "velké množství") podle číselného vstupu – quantityordered.
+
+CREATE OR REPLACE FUNCTION velikost_mnozstvi(quantity INTEGER)
+RETURNS VARCHAR(50) AS $$
+DECLARE
+  vysledek VARCHAR(50);
+BEGIN
+  IF quantityordered < 10 THEN
+    vysledek := 'male mnozstvi';
+  ELSIF quantityordered < 20 THEN
+    vysledek := 'stredni mnozstvi';
+  ELSIF quantityordered < 50 THEN
+    vysledek := 'prumerne mnozstvi';
+  ELSE
+    vysledek := 'velke mnozstvi';
+  END IF;
+
+  RETURN vysledek;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT velikost_mnozstvi(125);
+
+
+-- výstup velke_mnozstvi
+
