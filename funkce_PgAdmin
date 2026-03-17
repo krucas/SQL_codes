@@ -1,0 +1,57 @@
+--Jednoducha funkce na zvolani pres SELECT, kdy doplunji jmeno, email, city, region a layalty. 
+--Aktivuje se přes "pridat_customers"
+
+CREATE OR REPLACE FUNCTION pridat_customers(
+    p_first_name TEXT,
+    p_last_name TEXT,
+    p_email TEXT,
+    p_city TEXT,
+    p_region TEXT,
+	p_loyalty_tier TEXT
+	
+)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO customers (
+        first_name,
+        last_name,
+        email,
+        city,
+        region,
+        created_date,
+		loyalty_tier
+    )
+    VALUES (
+        p_first_name,
+        p_last_name,
+        p_email,
+        p_city,
+        p_region,
+        NOW(),
+		p_loyalty_tier
+    );
+
+    RETURN 'Customer přidán';
+END;
+$$;
+
+
+-- pokud nezname hodnotu, musime pouzit '', pgADMIN nevezme NULL hodnotu. 
+SELECT pridat_customers('','Moudra','','Benešeov','Středočeský', 'Silver');
+
+
+
+SELECT * FROM customers
+ORDER BY customer_id DESC;
+
+UPDATE customers
+SET loyalty_tier = 'Gold'
+WHERE customer_id = 802;
+
+
+UPDATE customers
+SET region = 'Praha'
+WHERE customer_id = 801;
+
