@@ -1,6 +1,15 @@
 💾 Audit log změn částky v tabulce amount
 Tento SQL skript zavádí mechanismus auditu změn sloupce amount v tabulce amount. Cílem je sledovat každou změnu hodnoty a ukládat informace o těchto změnách do nové tabulky audit_log.
 
+
+👉 Funkce
+= „dej mi výsledek“
+👉 Procedura
+= „udělej něco“
+👉 Trigger
+= „reaguj automaticky“
+
+
 🔧 Co skript dělá:
 Vytváří tabulku audit_log
 Uchovává záznamy o změnách částky (amount) včetně
@@ -115,7 +124,8 @@ AS $$
 
 BEGIN
 	RETURN QUERY
-	SELECT productcode, SUM(quantityordered)
+	SELECT productcode, 
+	       SUM(quantityordered)
 	FROM orderdetails
 	WHERE ordernumber = order_number
 	GROUP BY productcode
