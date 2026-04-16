@@ -81,3 +81,41 @@ ORDER BY position DESC;
 
 
 
+Atributy - kategorie, oddělení, třída, ovoce, barva
+
+Metriky - číselné hodnoty, které bych použil, 
+většinou agregoval, součet, počet, nebo je použít ve vzorcích. cena
+
+Dává smysl to sečíst nebo zprůměrovat?“
+ANO → metrika - (metric) = číslo → „kolik toho je?“
+NE → atribut  -(dimension) = popis → „jaké to je?“
+
+--------------------------
+SELECT 
+    ovoce,              -- atribut
+    SUM(cena) AS total  -- metrika
+FROM fruits
+GROUP BY ovoce;
+
+
+THE BIG 6
+SELECT
+FROM
+WHERE
+GROUP BY
+HAVING
+ORDER BY
+
+
+
+👉 kolik objednávek je v každé kategorii + revenue
+
+(tzn. 2 metriky)
+
+SELECT category,
+	COUNT(order_id) as pocet_objednavek,
+	AVG(revenue) as avg_revenue
+FROM orders
+GROUP BY category
+ORDER BY revenue DESC;
+
