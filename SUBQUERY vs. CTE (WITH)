@@ -1,0 +1,35 @@
+-- SUBQUERY = „strčím to rovnou dovnitř závorky“
+SELECT payment_method,
+       total_method,
+       total_order_revenue,
+       RANK() OVER (ORDER BY total_method DESC) AS poradi
+FROM (
+    SELECT payment_method,
+           COUNT(payment_method) AS total_method,
+           SUM(order_revenue_czk) AS total_order_revenue
+    FROM orders
+    GROUP BY payment_method
+) AS methods;
+
+
+-- CTE (WITH) = „nejdřív si to napíšu bokem a pak použiju“
+
+WITH methods AS (
+
+SELECT payment_method,
+		COUNT(payment_method) as total_method,
+		SUM(order_revenue_czk) as total_order_revenue
+FROM orders
+GROUP BY payment_method
+
+) SELECT payment_method,
+		 total_method,
+		 total_order_revenue,
+		RANK () OVER (ORDER BY total_method DESC) as poradi
+FROM methods; 
+
+
+CTE (WITH)	Subquery
+přehlednější	 / kratší
+lepší pro složitější logiku /	dobré pro jednoduché věci
+můžeš použít víckrát / 	použiješ jen jednou
