@@ -1,0 +1,67 @@
+
+-- 1. Měsíční revenue + % podíl
+-- Měsíční tržby a jejich procentuální podíl na celkových tržbách (rok 2024)
+
+SELECT 
+    DATE_TRUNC('month', order_datetime) AS month,
+    SUM(order_revenue_czk) AS total_revenue,
+    ROUND(
+        100.0 * SUM(order_revenue_czk) 
+        / SUM(SUM(order_revenue_czk)) OVER (), 
+        2
+    ) AS percentage_by_revenue
+FROM orders
+WHERE order_datetime >= '2024-01-01' AND order_datetime < '2025-01-01'
+GROUP BY month
+ORDER BY month;
+
+
+-- 2. Průměrné revenue za den
+-- Průměrné tržby za jednotlivé dny
+
+SELECT 
+    DATE(order_datetime) AS day,
+    AVG(order_revenue_czk) AS avg_revenue
+FROM orders
+GROUP BY day
+ORDER BY day;
+
+
+-- 3. Revenue podle měsíce (číslo)
+-- Tržby podle měsíců (1–12) a jejich podíl na celku
+
+SELECT EXTRACT(Month FROM order_datetime) as month_revenue,
+       SUM(order_revenue_czk) as total_revenue,
+	   ROUND(100 * SUM(order_revenue_czk) 
+	   / SUM(SUM(order_revenue_czk)) OVER (),2 ) as percentage_by_revenue
+FROM orders
+GROUP BY month_revenue
+ORDER BY month_revenue;
+
+-- 4. Objednávky podle dne v týdnu
+-- Počet objednávek podle dne v týdnu
+
+SELECT 
+    TO_CHAR(order_datetime, 'FMDay') AS day_name,
+    COUNT(*) AS total_order_day
+FROM orders
+GROUP BY day_name
+ORDER BY day_name;
+
+-- 5. Rozdíl od maxima (počet objednávek)
+-- Rozdíl a procentuální rozdíl od nejlepšího (nejvyššího) měsíce
+
+WITH diff_from_max AS (
+SELECT Extract( MONTH FROM order_datetime) as month,
+       COUNT(*) as orders_count
+FROM orders
+GROUP BY month
+ORDER BY month
+)
+SELECT month,
+		orders_count,
+		MAX(orders_count) OVER () - orders_count AS diff_from_max,
+		ROUND( 100.0 * (MAX(orders_count) OVER () - orders_count) 
+        / MAX(orders_count) OVER (), 
+        2 ) AS diff_pct_from_max
+FROM diff_from_max;
