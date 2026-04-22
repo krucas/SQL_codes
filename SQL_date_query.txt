@@ -65,3 +65,45 @@ SELECT month,
         / MAX(orders_count) OVER (), 
         2 ) AS diff_pct_from_max
 FROM diff_from_max;
+
+
+-- Data Drill Showdown #6: Streak Leaderboard 
+-- Co ten dotaz reálně dělá v jedné větě
+-- Pro každého uživatele vezme unikátní aktivní dny, zjistí předchozí den aktivity, označí přerušení streaku a pomocí průběžného součtu vytvoří skupiny navazujících streaků.
+
+WITH active_days AS (
+    SELECT DISTINCT user_name,
+           "date"
+    FROM lesson_users
+)
+, streak_cals AS (
+SELECT user_name,
+       "date",
+       LAG("date") OVER (PARTITION BY user_name ORDER BY "date") AS prior_date,
+       "date" - LAG("date") OVER (PARTITION BY user_name ORDER BY "date") AS days_since_prior
+	   ,CASE WHEN ("date" - LAG("date") OVER (PARTITION BY user_name ORDER BY "date")) = 1 THEN 0
+	   ELSE 1
+	   END AS streak_break
+FROM active_days
+)
+, streak_groups AS (
+SELECT 
+		user_name,
+       "date"
+	   ,prior_date
+	   ,SUM(streak_break) OVER (
+            PARTITION BY user_name 
+            ORDER BY "date" 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+         ) AS streak_group
+FROM streak_cals  
+) 
+SELECT user_name
+       ,streak_group
+	   ,MIN("date") AS streak_start
+	   ,MAX("date") AS streak_end
+	   ,COUNT(*) AS streak_length
+FROM streak_groups
+GROUP BY user_name, streak_group
+ORDER BY streak_end DESC, streak_length DESC;
+	
